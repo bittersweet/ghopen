@@ -32,10 +32,7 @@ func main() {
 
 	// check pwd with gitdir
 	pwd := os.Getenv("PWD")
-	if pwd == dirString {
-		// exactly the same, we can open the root page on GH
-		fmt.Println("pwd == gitdir")
-	} else {
+	if pwd != dirString {
 		// index 1 will contain the difference between pwd and git root
 		splitted := strings.SplitAfter(pwd, dirString)
 		fmt.Printf("%#v\n", splitted)
