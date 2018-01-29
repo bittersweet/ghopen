@@ -23,18 +23,18 @@ func main() {
 	}
 	fullUrl := fmt.Sprintf("https://github.com/%s", repository[0][1])
 
-	gitDir, err := exec.Command("git", "rev-parse", "--sq", "--show-toplevel").Output()
+	gitRoot, err := exec.Command("git", "rev-parse", "--sq", "--show-toplevel").Output()
 	if nerr, ok := err.(*exec.ExitError); ok {
 		log.Fatalf("Exit error: %s", nerr.Error())
 	}
-	dirString := string(gitDir)
-	dirString = strings.TrimRight(dirString, "\n")
+	// Trim \n character from rev-parse output
+	gitRoot = gitRoot[:len(gitRoot)-1]
+	gitDir := string(gitRoot)
 
-	// check pwd with gitdir
 	pwd := os.Getenv("PWD")
-	if pwd != dirString {
+	if pwd != gitDir {
 		// index 1 will contain the difference between pwd and git root
-		splitted := strings.SplitAfter(pwd, dirString)
+		splitted := strings.SplitAfter(pwd, gitDir)
 		fmt.Printf("%#v\n", splitted)
 
 		branch := "master" // TODO: update to get current git branch
