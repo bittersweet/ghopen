@@ -65,6 +65,11 @@ func main() {
 
 		fullUrl = fmt.Sprintf("%s/tree/%s%s", fullUrl, branch, splitted[1])
 		fullUrl = fmt.Sprintf("%s/%s", fullUrl, filename)
+
+		// line number
+		if len(os.Args) > 2 {
+			fullUrl = fmt.Sprintf("%s#L%s", fullUrl, os.Args[2])
+		}
 	} else if pwd != gitDir {
 		splitted := strings.SplitAfter(pwd, gitDir)
 
