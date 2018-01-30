@@ -9,6 +9,17 @@ import (
 	"strings"
 )
 
+func getCurrentBranch() string {
+	branch, err := exec.Command("git", "rev-parse", "--abbrev-ref", "HEAD").Output()
+	if nerr, ok := err.(*exec.ExitError); ok {
+		log.Fatalf("Exit error: %s", nerr.Error())
+	}
+
+	// Trim \n character from rev-parse output
+	branch = branch[:len(branch)-1]
+	return string(branch)
+}
+
 func main() {
 	url, err := exec.Command("git", "config", "remote.origin.url").Output()
 	if nerr, ok := err.(*exec.ExitError); ok {
@@ -32,7 +43,7 @@ func main() {
 	gitDir := string(gitRoot)
 
 	pwd := os.Getenv("PWD")
-	branch := "master"
+	branch := getCurrentBranch()
 
 	if len(os.Args) > 1 {
 		splitted := strings.SplitAfter(pwd, gitDir)
