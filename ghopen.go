@@ -20,6 +20,15 @@ func getCurrentBranch() string {
 	return string(branch)
 }
 
+func fileExists(filename string) bool {
+	_, err := os.Stat(filename)
+	if err != nil {
+		return false
+	}
+
+	return true
+}
+
 func main() {
 	url, err := exec.Command("git", "config", "remote.origin.url").Output()
 	if nerr, ok := err.(*exec.ExitError); ok {
@@ -46,10 +55,16 @@ func main() {
 	branch := getCurrentBranch()
 
 	if len(os.Args) > 1 {
+		filename := os.Args[1]
+		if !fileExists(filename) {
+			fmt.Printf("File does not exist: %s\n", filename)
+			os.Exit(1)
+		}
+
 		splitted := strings.SplitAfter(pwd, gitDir)
 
 		fullUrl = fmt.Sprintf("%s/tree/%s%s", fullUrl, branch, splitted[1])
-		fullUrl = fmt.Sprintf("%s/%s", fullUrl, os.Args[1])
+		fullUrl = fmt.Sprintf("%s/%s", fullUrl, filename)
 	} else if pwd != gitDir {
 		splitted := strings.SplitAfter(pwd, gitDir)
 
