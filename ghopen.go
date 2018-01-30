@@ -32,18 +32,16 @@ func main() {
 	gitDir := string(gitRoot)
 
 	pwd := os.Getenv("PWD")
+	branch := "master"
 
 	if len(os.Args) > 1 {
 		splitted := strings.SplitAfter(pwd, gitDir)
 
-		branch := "master" // TODO: update to get current git branch
 		fullUrl = fmt.Sprintf("%s/tree/%s%s", fullUrl, branch, splitted[1])
 		fullUrl = fmt.Sprintf("%s/%s", fullUrl, os.Args[1])
 	} else if pwd != gitDir {
-		// index 1 will contain the difference between pwd and git root
 		splitted := strings.SplitAfter(pwd, gitDir)
 
-		branch := "master" // TODO: update to get current git branch
 		fullUrl = fmt.Sprintf("%s/tree/%s%s", fullUrl, branch, splitted[1])
 	}
 
