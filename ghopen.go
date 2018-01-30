@@ -2,22 +2,25 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"os/exec"
 	"regexp"
 	"strings"
 )
 
-func getCurrentBranch() string {
-	branch, err := exec.Command("git", "rev-parse", "--abbrev-ref", "HEAD").Output()
-	if nerr, ok := err.(*exec.ExitError); ok {
-		log.Fatalf("Exit error: %s", nerr.Error())
+func gitCommand(args ...string) string {
+	output, err := exec.Command("git", args...).Output()
+	if _, ok := err.(*exec.ExitError); ok {
+		fmt.Println("GHOpen error: Received exit status 1 from git")
+		os.Exit(1)
 	}
 
 	// Trim \n character from rev-parse output
-	branch = branch[:len(branch)-1]
-	return string(branch)
+	return string(output[:len(output)-1])
+}
+
+func getCurrentBranch() string {
+	return gitCommand("rev-parse", "--abbrev-ref", "HEAD")
 }
 
 func fileExists(filename string) bool {
@@ -29,27 +32,24 @@ func fileExists(filename string) bool {
 	return true
 }
 
-func main() {
-	url, err := exec.Command("git", "config", "remote.origin.url").Output()
-	if nerr, ok := err.(*exec.ExitError); ok {
-		log.Fatalf("Exit error: %s", nerr.Error())
-	}
-
+func getRepository() string {
+	url := gitCommand("config", "remote.origin.url")
 	r := regexp.MustCompile(`github.com:(.+)\.git`)
-
 	repository := r.FindAllStringSubmatch(string(url), -1)
 	if repository == nil {
-		log.Fatalf("No repository found")
+		fmt.Println("GHOpen error: no remote repository found")
+		os.Exit(1)
 	}
-	fullUrl := fmt.Sprintf("https://github.com/%s", repository[0][1])
+	return fmt.Sprintf("https://github.com/%s", repository[0][1])
+}
 
-	gitRoot, err := exec.Command("git", "rev-parse", "--sq", "--show-toplevel").Output()
-	if nerr, ok := err.(*exec.ExitError); ok {
-		log.Fatalf("Exit error: %s", nerr.Error())
-	}
-	// Trim \n character from rev-parse output
-	gitRoot = gitRoot[:len(gitRoot)-1]
-	gitDir := string(gitRoot)
+func getGitRoot() string {
+	return gitCommand("rev-parse", "--sq", "--show-toplevel")
+}
+
+func main() {
+	fullUrl := getRepository()
+	gitRoot := getGitRoot()
 
 	pwd := os.Getenv("PWD")
 	branch := getCurrentBranch()
@@ -61,17 +61,17 @@ func main() {
 			os.Exit(1)
 		}
 
-		splitted := strings.SplitAfter(pwd, gitDir)
+		splitted := strings.SplitAfter(pwd, gitRoot)
 
 		fullUrl = fmt.Sprintf("%s/tree/%s%s", fullUrl, branch, splitted[1])
 		fullUrl = fmt.Sprintf("%s/%s", fullUrl, filename)
 
-		// line number
+		// argument 2 contains the line number
 		if len(os.Args) > 2 {
 			fullUrl = fmt.Sprintf("%s#L%s", fullUrl, os.Args[2])
 		}
-	} else if pwd != gitDir {
-		splitted := strings.SplitAfter(pwd, gitDir)
+	} else if pwd != gitRoot {
+		splitted := strings.SplitAfter(pwd, gitRoot)
 
 		fullUrl = fmt.Sprintf("%s/tree/%s%s", fullUrl, branch, splitted[1])
 	}
