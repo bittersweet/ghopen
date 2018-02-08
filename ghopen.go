@@ -48,7 +48,7 @@ func main() {
 	gitRoot := getGitRoot()
 
 	pwd := os.Getenv("PWD")
-	branch := gitCommand("rev-parse", "HEAD")
+	sha := gitCommand("rev-parse", "HEAD")
 
 	if len(os.Args) > 1 {
 		filename := os.Args[1]
@@ -59,7 +59,7 @@ func main() {
 
 		splitted := strings.SplitAfter(pwd, gitRoot)
 
-		fullUrl = fmt.Sprintf("%s/tree/%s%s", fullUrl, branch, splitted[1])
+		fullUrl = fmt.Sprintf("%s/tree/%s%s", fullUrl, sha, splitted[1])
 		fullUrl = fmt.Sprintf("%s/%s", fullUrl, filename)
 
 		// argument 2 contains the line number
@@ -69,7 +69,7 @@ func main() {
 	} else if pwd != gitRoot {
 		splitted := strings.SplitAfter(pwd, gitRoot)
 
-		fullUrl = fmt.Sprintf("%s/tree/%s%s", fullUrl, branch, splitted[1])
+		fullUrl = fmt.Sprintf("%s/tree/%s%s", fullUrl, sha, splitted[1])
 	}
 
 	fmt.Printf("Opening url: %s\n", fullUrl)
