@@ -19,8 +19,8 @@ func gitCommand(args ...string) string {
 	return string(output[:len(output)-1])
 }
 
-func getCurrentBranch() string {
-	return gitCommand("rev-parse", "--abbrev-ref", "HEAD")
+func getCurrentSha() string {
+	return gitCommand("rev-parse", "HEAD")
 }
 
 func fileExists(filename string) bool {
@@ -52,7 +52,7 @@ func main() {
 	gitRoot := getGitRoot()
 
 	pwd := os.Getenv("PWD")
-	branch := getCurrentBranch()
+	branch := getCurrentSha()
 
 	if len(os.Args) > 1 {
 		filename := os.Args[1]
