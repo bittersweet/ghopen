@@ -57,10 +57,15 @@ func main() {
 			os.Exit(1)
 		}
 
-		splitted := strings.SplitAfter(pwd, gitRoot)
+		// output will have 3 lines, prefix, top level, and the path to the file requested
+		revOutput := gitCommand("rev-parse", "--show-prefix", "--show-toplevel", filename)
+		revOutputSplit := strings.Split(revOutput, "\n")
 
-		fullUrl = fmt.Sprintf("%s/tree/%s%s", fullUrl, sha, splitted[1])
-		fullUrl = fmt.Sprintf("%s/%s", fullUrl, filename)
+		prefix := revOutputSplit[0]
+		path := revOutputSplit[2]
+
+		relativePath := fmt.Sprintf("%s%s", prefix, path)
+		fullUrl = fmt.Sprintf("%s/blob/%s/%s", fullUrl, sha, relativePath)
 
 		// argument 2 contains the line number
 		if len(os.Args) > 2 {
