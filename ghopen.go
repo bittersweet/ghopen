@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/exec"
 	"regexp"
+	"runtime"
 	"strings"
 )
 
@@ -78,5 +79,9 @@ func main() {
 	}
 
 	fmt.Printf("Opening url: %s\n", fullUrl)
-	exec.Command("open", fullUrl).Run()
+	if runtime.GOOS == "linux" {
+		exec.Command("xdg-open", fullUrl).Run()
+	} else {
+		exec.Command("open", fullUrl).Run()
+	}
 }
