@@ -58,14 +58,17 @@ func main() {
 			os.Exit(1)
 		}
 
-		// output will have 3 lines, prefix, top level, and the path to the file requested
-		revOutput := gitCommand("rev-parse", "--show-prefix", "--show-toplevel", filename)
+		revOutput := gitCommand("rev-parse", "--show-toplevel", filename)
 		revOutputSplit := strings.Split(revOutput, "\n")
 
-		prefix := revOutputSplit[0]
-		path := revOutputSplit[2]
+		// /home/user/project
+		gitRoot := revOutputSplit[0]
+		// /home/user/project/directory/file.extension
+		fullFilePath := revOutputSplit[1]
 
-		relativePath := fmt.Sprintf("%s%s", prefix, path)
+		relativePath := strings.TrimPrefix(fullFilePath, gitRoot)
+		relativePath = strings.TrimPrefix(relativePath, "/")
+
 		fullUrl = fmt.Sprintf("%s/blob/%s/%s", fullUrl, sha, relativePath)
 
 		// argument 2 contains the line number
