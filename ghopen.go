@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"os"
 	"os/exec"
@@ -51,7 +52,12 @@ func main() {
 	pwd := os.Getenv("PWD")
 	sha := gitCommand("rev-parse", "HEAD")
 
-	if len(os.Args) > 1 {
+	commitSha := flag.String("commit", "default", "sha1")
+	flag.Parse()
+
+	if *commitSha != "default" {
+		fullUrl = fmt.Sprintf("%s/commit/%s", fullUrl, *commitSha)
+	} else if len(os.Args) > 1 {
 		filename := os.Args[1]
 		if !fileExists(filename) {
 			fmt.Printf("File does not exist: %s\n", filename)
